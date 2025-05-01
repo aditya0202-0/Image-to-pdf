@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image to PDF Compressor</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+    input[type=file] { margin: 20px 0; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    #preview { max-width: 300px; margin: 10px auto; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Convert Image to PDF and Compress</h1>
+  <input type="file" accept="image/*" id="imageInput" />
+  <br />
+  <img id="preview" src="" alt="Preview" hidden />
+  <br />
+  <button onclick="convertToPdf()">Convert & Download PDF</button>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+    let imageDataUrl = "";
+
+    imageInput.addEventListener("change", function () {
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        imageDataUrl = e.target.result;
+        preview.src = imageDataUrl;
+        preview.hidden = false;
+      };
+      if (file) reader.readAsDataURL(file);
+    });
+
+    function convertToPdf() {
+      if (!imageDataUrl) {
+        alert("Please upload an image first.");
+        return;
+      }
+      const pdf = new jsPDF({ compress: true });
+      const imgProps = pdf.getImageProperties(imageDataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imageDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save("converted-compressed.pdf");
+    }
+  </script>
+</body>
+</html>
